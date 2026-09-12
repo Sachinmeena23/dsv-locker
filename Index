@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSV Locker 🛅 - Document Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --dark-bg: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1a1f3a 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      transition: all 0.3s ease;
+    }
+
+    body.light-mode {
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: #1e293b;
+      --card-bg: #ffffff;
+      --dark-bg: #f8fafc;
+      --border-color: #e2e8f0;
+    }
+
+    .navbar-custom {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(51, 65, 85, 0.3);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+      padding: 1rem 2rem;
+    }
+
+    body.light-mode .navbar-custom {
+      background: rgba(248, 250, 252, 0.95);
+      border-bottom-color: rgba(226, 232, 240, 0.5);
+    }
+
+    .navbar-brand {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .theme-toggle {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1) rotate(20deg);
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 0.8rem;
+      overflow-x: auto;
+      padding: 1.5rem 0;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tab {
+      padding: 0.75rem 1.5rem;
+      background: rgba(51, 65, 85, 0.3);
+      border: 2px solid transparent;
+      border-radius: 50px;
+      color: #e2e8f0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    body.light-mode .filter-tab {
+      background: rgba(226, 232, 240, 0.5);
+      color: #1e293b;
+    }
+
+    .filter-tab:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+    }
+
+    .filter-tab.active {
+      background: var(--primary-gradient);
+      color: white;
+      border-color: #667eea;
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .search-container {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: rgba(51, 65, 85, 0.3);
+      border: 2px solid rgba(102, 126, 234, 0.3);
+      border-radius: 50px;
+      color: #e2e8f0;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    body.light-mode .search-input {
+      background: rgba(226, 232, 240, 0.5);
+      color: #1e293b;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.1);
+      box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid rgba(102, 126, 234, 0.2);
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-title {
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .form-control, .form-select {
+      background: rgba(51, 65, 85, 0.3);
+      border: 1px solid var(--border-color);
+      color: #e2e8f0;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      transition: all 0.3s ease;
+    }
+
+    body.light-mode .form-control,
+    body.light-mode .form-select {
+      background: rgba(248, 250, 252, 0.8);
+      color: #1e293b;
+      border-color: #e2e8f0;
+    }
+
+    .form-control:focus, .form-select:focus {
+      background: rgba(102, 126, 234, 0.1);
+      border-color: #667eea;
+      color: #e2e8f0;
+      box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 0.5rem;
+    }
+
+    body.light-mode .form-label {
+      color: #475569;
+    }
+
+    .upload-area {
+      border: 2px dashed rgba(102, 126, 234, 0.4);
+      border-radius: 10px;
+      padding: 2rem;
+      text-align: center;
+      background: rgba(102, 126, 234, 0.05);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin: 1rem 0;
+    }
+
+    .upload-area:hover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.15);
+    }
+
+    .upload-area.dragover {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-primary-custom {
+      background: var(--primary-gradient);
+      border: none;
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary-custom:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+      color: white;
+    }
+
+    .btn-success-custom {
+      background: var(--success-gradient);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .btn-danger-custom {
+      background: var(--danger-gradient);
+      border: none;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .document-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      animation: slideIn 0.5s ease forwards;
+      position: relative;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .document-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      border-color: #667eea;
+    }
+
+    .card-header-icon {
+      width: 100%;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: white;
+    }
+
+    .card-header-icon.personal {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+
+    .card-header-icon.business {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+
+    .card-header-icon.video {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+
+    .card-header-icon.website {
+      background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    body.light-mode .card-title {
+      color: #1e293b;
+    }
+
+    .card-category {
+      display: inline-block;
+      background: rgba(102, 126, 234, 0.2);
+      color: #667eea;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+    }
+
+    .card-meta {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+
+    body.light-mode .card-meta {
+      color: #64748b;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .card-action-btn {
+      flex: 1;
+      min-width: 80px;
+      padding: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-view {
+      background: rgba(102, 126, 234, 0.2);
+      color: #667eea;
+    }
+
+    .btn-view:hover {
+      background: rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-download {
+      background: rgba(17, 153, 142, 0.2);
+      color: #11998e;
+    }
+
+    .btn-download:hover {
+      background: rgba(17, 153, 142, 0.4);
+    }
+
+    .btn-approve {
+      background: var(--success-gradient);
+      color: white;
+    }
+
+    .btn-reject {
+      background: var(--danger-gradient);
+      color: white;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+    }
+
+    .status-approved {
+      background: rgba(17, 153, 142, 0.2);
+      color: #38ef7d;
+    }
+
+    .status-rejected {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+    }
+
+    .status-pending {
+      background: rgba(240, 147, 251, 0.2);
+      color: #f093fb;
+    }
+
+    .timer-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--danger-gradient);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: #94a3b8;
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      color: rgba(102, 126, 234, 0.3);
+      margin-bottom: 1rem;
+    }
+
+    .loading-indicator {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .spinner {
+      border: 4px solid rgba(102, 126, 234, 0.2);
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .upload-progress {
+      width: 100%;
+      height: 8px;
+      background: rgba(51, 65, 85, 0.3);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 1rem 0;
+    }
+
+    .progress-bar-custom {
+      height: 100%;
+      background: var(--primary-gradient);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .alert-message {
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .alert-success {
+      background: rgba(17, 153, 142, 0.2);
+      color: #38ef7d;
+      border: 1px solid rgba(17, 153, 142, 0.4);
+    }
+
+    .alert-error {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff6b6b;
+      border: 1px solid rgba(255, 107, 107, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .card-container {
+        grid-template-columns: 1fr;
+      }
+
+      .navbar-custom {
+        padding: 1rem;
+      }
+
+      .filter-tabs {
+        gap: 0.5rem;
+      }
+
+      .filter-tab {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar-custom">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="navbar-brand">
+          <i class="fas fa-lock"></i> DSV Locker 🛅
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-primary-custom" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            <i class="fas fa-plus"></i> Add Document
+          </button>
+          <button class="theme-toggle" id="themeToggle">
+            <i class="fas fa-moon"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container-fluid" style="padding: 2rem;">
+    <div class="alert-message alert-success" id="successAlert"></div>
+    <div class="alert-message alert-error" id="errorAlert"></div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search by name, date, or tag...">
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-filter="All">All Documents</button>
+      <button class="filter-tab" data-filter="Personal Documents">
+        <i class="fas fa-user"></i> Personal
+      </button>
+      <button class="filter-tab" data-filter="Business Documents">
+        <i class="fas fa-briefcase"></i> Business
+      </button>
+      <button class="filter-tab" data-filter="Video Links & Files">
+        <i class="fas fa-video"></i> Videos
+      </button>
+      <button class="filter-tab" data-filter="Website Links">
+        <i class="fas fa-globe"></i> Websites
+      </button>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div class="loading-indicator" id="loadingIndicator">
+      <div class="spinner"></div>
+      <p>Loading documents...</p>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="card-container" id="cardsContainer">
+      <div class="empty-state">
+        <i class="fas fa-folder-open"></i>
+        <h3>No documents yet</h3>
+        <p>Click "Add Document" to start managing your documents</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Upload Modal -->
+  <div class="modal fade" id="uploadModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Document</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="uploadForm">
+            <!-- Category Selection -->
+            <div class="mb-3">
+              <label class="form-label">Category *</label>
+              <select class="form-select" id="category" required>
+                <option value="">Select a category</option>
+                <option value="Personal Documents">Personal Documents</option>
+                <option value="Business Documents">Business Documents</option>
+                <option value="Video Links & Files">Video Links & Files</option>
+                <option value="Website Links">Website Links</option>
+              </select>
+            </div>
+
+            <!-- Document Title -->
+            <div class="mb-3">
+              <label class="form-label">Document Title *</label>
+              <input type="text" class="form-control" id="title" placeholder="e.g., Passport, PAN Card" required>
+            </div>
+
+            <!-- Name -->
+            <div class="mb-3">
+              <label class="form-label">Name</label>
+              <input type="text" class="form-control" id="name" placeholder="Your full name">
+            </div>
+
+            <!-- Document Number -->
+            <div class="mb-3">
+              <label class="form-label">Document/ID Number</label>
+              <input type="text" class="form-control" id="documentNumber" placeholder="Aadhaar/PAN/ID Number">
+            </div>
+
+            <!-- Date -->
+            <div class="mb-3">
+              <label class="form-label">Date</label>
+              <input type="date" class="form-control" id="date">
+            </div>
+
+            <!-- Tags -->
+            <div class="mb-3">
+              <label class="form-label">Tags</label>
+              <input type="text" class="form-control" id="tags" placeholder="e.g., important, urgent">
+            </div>
+
+            <!-- File Upload -->
+            <div id="fileUploadContainer" class="mb-3" style="display: none;">
+              <label class="form-label">Upload Document *</label>
+              <div class="upload-area" id="uploadArea">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <p>Drag & drop your file or click to browse</p>
+                <small>Supported: PDF, JPG, PNG</small>
+              </div>
+              <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png" style="display: none;">
+              <div class="upload-progress" id="uploadProgress" style="display: none;">
+                <div class="progress-bar-custom" id="progressBar"></div>
+              </div>
+              <small id="fileName" style="color: #667eea;"></small>
+            </div>
+
+            <!-- Video Upload/URL -->
+            <div id="videoContainer" style="display: none;">
+              <label class="form-label">Video File or URL</label>
+              <div class="mb-3">
+                <input type="file" class="form-control" id="videoFile" accept=".mp4,.webm">
+                <small class="text-muted d-block mt-2">OR</small>
+              </div>
+              <div class="mb-3">
+                <input type="url" class="form-control" id="videoUrl" placeholder="YouTube/Vimeo/Direct MP4 URL">
+              </div>
+            </div>
+
+            <!-- Website URL -->
+            <div id="webLinkContainer" style="display: none;">
+              <label class="form-label">Website URL *</label>
+              <input type="url" class="form-control" id="webLink" placeholder="https://example.com" required>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-flex gap-2 mt-4">
+              <button type="submit" class="btn btn-primary-custom flex-grow-1">
+                <i class="fas fa-save"></i> Save Document
+              </button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Global State
+    let allRecords = [];
+    let currentFilter = 'All';
+    let currentSearchQuery = '';
+    let isLoading = false;
+
+    const categoryIcons = {
+      'Personal Documents': '📸',
+      'Business Documents': '📄',
+      'Video Links & Files': '🎬',
+      'Website Links': '🌐'
+    };
+
+    // Theme Toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+      document.body.classList.add('light-mode');
+      themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    }
+
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('light-mode');
+      const isLight = document.body.classList.contains('light-mode');
+      localStorage.setItem('theme', isLight ? 'light' : 'dark');
+      themeToggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    });
+
+    // Show Alert
+    function showAlert(message, type = 'success') {
+      const alertEl = type === 'success' ? document.getElementById('successAlert') : document.getElementById('errorAlert');
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+      setTimeout(() => {
+        alertEl.style.display = 'none';
+      }, 3000);
+    }
+
+    // Form Logic
+    const categorySelect = document.getElementById('category');
+    const fileUploadContainer = document.getElementById('fileUploadContainer');
+    const videoContainer = document.getElementById('videoContainer');
+    const webLinkContainer = document.getElementById('webLinkContainer');
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+
+    categorySelect.addEventListener('change', (e) => {
+      const category = e.target.value;
+      fileUploadContainer.style.display = category === 'Personal Documents' || category === 'Business Documents' ? 'block' : 'none';
+      videoContainer.style.display = category === 'Video Links & Files' ? 'block' : 'none';
+      webLinkContainer.style.display = category === 'Website Links' ? 'block' : 'none';
+    });
+
+    // Drag & Drop
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        displayFileName();
+      }
+    });
+
+    fileInput.addEventListener('change', displayFileName);
+
+    function displayFileName() {
+      if (fileInput.files.length > 0) {
+        document.getElementById('fileName').textContent = `📎 ${fileInput.files[0].name}`;
+      }
+    }
+
+    // Filter & Search
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        e.target.closest('.filter-tab').classList.add('active');
+        currentFilter = e.target.closest('.filter-tab').dataset.filter;
+        renderCards();
+      });
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      currentSearchQuery = e.target.value.toLowerCase();
+      renderCards();
+    });
+
+    // Render Cards
+    function renderCards() {
+      const cardsContainer = document.getElementById('cardsContainer');
+      let filtered = allRecords;
+
+      if (currentFilter !== 'All') {
+        filtered = filtered.filter(r => r.category === currentFilter);
+      }
+
+      if (currentSearchQuery) {
+        filtered = filtered.filter(r =>
+          r.title.toLowerCase().includes(currentSearchQuery) ||
+          r.name.toLowerCase().includes(currentSearchQuery) ||
+          r.tags.toLowerCase().includes(currentSearchQuery)
+        );
+      }
+
+      if (filtered.length === 0) {
+        cardsContainer.innerHTML = `
+          <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>No documents found</h3>
+            <p>Try adjusting your filters or search</p>
+          </div>
+        `;
+        return;
+      }
+
+      cardsContainer.innerHTML = filtered.map(record => {
+        const iconClass = record.category.toLowerCase()
+          .replace('personal documents', 'personal')
+          .replace('business documents', 'business')
+          .replace('video links & files', 'video')
+          .replace('website links', 'website');
+
+        return `
+          <div class="document-card">
+            ${record.status === 'Rejected' ? `<div class="timer-badge" data-timer="${record.id}">🕐 30s</div>` : ''}
+            <div class="card-header-icon ${iconClass}">
+              ${categoryIcons[record.category] || '📄'}
+            </div>
+            <div class="card-body">
+              <div class="card-category">${record.category}</div>
+              <div class="card-title">${record.title}</div>
+              ${record.name ? `<div class="card-meta">👤 ${record.name}</div>` : ''}
+              ${record.documentNumber ? `<div class="card-meta">🔢 ${record.documentNumber}</div>` : ''}
+              ${record.date ? `<div class="card-meta">📅 ${record.date}</div>` : ''}
+              ${record.tags ? `<div class="card-meta">🏷️ ${record.tags}</div>` : ''}
+              <div class="status-badge status-${record.status.toLowerCase()}">${record.status}</div>
+              <div class="card-actions">
+                ${record.fileLink ? `
+                  <button class="card-action-btn btn-view" onclick="viewDocument('${record.fileLink}', '${record.category}')">
+                    <i class="fas fa-eye"></i> View
+                  </button>
+                  <button class="card-action-btn btn-download" onclick="downloadDocument('${record.fileLink}', '${record.title}')">
+                    <i class="fas fa-download"></i> Download
+                  </button>
+                ` : ''}
+                ${record.videoUrl ? `
+                  <button class="card-action-btn btn-view" onclick="viewDocument('${record.videoUrl}', '${record.category}')">
+                    <i class="fas fa-play"></i> Play
+                  </button>
+                ` : ''}
+                ${record.webLink ? `
+                  <button class="card-action-btn btn-view" onclick="window.open('${record.webLink}', '_blank')">
+                    <i class="fas fa-link"></i> Open
+                  </button>
+                ` : ''}
+                ${record.status !== 'Approved' ? `
+                  <button class="card-action-btn btn-approve" onclick="approveRecord('${record.id}')">
+                    <i class="fas fa-check"></i> Approve
+                  </button>
+                ` : ''}
+                ${record.status !== 'Rejected' ? `
+                  <button class="card-action-btn btn-reject" onclick="rejectRecord('${record.id}')">
+                    <i class="fas fa-times"></i> Reject
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('[data-timer]').forEach(el => {
+        startRejectionTimer(el.dataset.timer);
+      });
+    }
+
+    // View Document
+    function viewDocument(url, category) {
+      if (category.includes('Video')) {
+        window.open(url, '_blank');
+      } else if (category.includes('Website')) {
+        window.open(url, '_blank');
+      } else {
+        window.open(url, '_blank');
+      }
+    }
+
+    function downloadDocument(url, title) {
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = title || 'document';
+      a.click();
+    }
+
+    // Approval & Rejection
+    function approveRecord(id) {
+      google.script.run.withSuccessHandler(() => {
+        showAlert('Document approved successfully!', 'success');
+        loadRecords();
+      }).withFailureHandler((error) => {
+        showAlert('Error: ' + error.toString(), 'error');
+      }).approveRecord(id);
+    }
+
+    function rejectRecord(id) {
+      if (confirm('Mark this document as rejected? It will be auto-deleted in 30 seconds.')) {
+        google.script.run.withSuccessHandler(() => {
+          showAlert('Document marked for deletion', 'success');
+          loadRecords();
+        }).withFailureHandler((error) => {
+          showAlert('Error: ' + error.toString(), 'error');
+        }).rejectRecord(id);
+      }
+    }
+
+    function startRejectionTimer(recordId) {
+      const timerEl = document.querySelector(`[data-timer="${recordId}"]`);
+      if (!timerEl) return;
+
+      let seconds = 30;
+      const interval = setInterval(() => {
+        seconds--;
+        timerEl.textContent = `🕐 ${seconds}s`;
+
+        if (seconds <= 0) {
+          clearInterval(interval);
+          google.script.run.withSuccessHandler(() => {
+            loadRecords();
+          }).deleteRecord(recordId);
+        }
+      }, 1000);
+    }
+
+    // Load Records
+    function loadRecords() {
+      document.getElementById('loadingIndicator').style.display = 'block';
+      google.script.run.withSuccessHandler((records) => {
+        allRecords = records || [];
+        renderCards();
+        document.getElementById('loadingIndicator').style.display = 'none';
+      }).withFailureHandler((error) => {
+        console.error('Error loading records:', error);
+        document.getElementById('loadingIndicator').style.display = 'none';
+        showAlert('Error loading documents', 'error');
+      }).getAllRecords();
+    }
+
+    // Form Submission
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const category = document.getElementById('category').value;
+      const title = document.getElementById('title').value;
+      const name = document.getElementById('name').value;
+      const documentNumber = document.getElementById('documentNumber').value;
+      const date = document.getElementById('date').value;
+      const tags = document.getElementById('tags').value;
+
+      if (!category || !title) {
+        showAlert('Please fill in required fields', 'error');
+        return;
+      }
+
+      let fileLink = '', videoUrl = '', webLink = '', driveFileId = '';
+
+      // Handle file upload
+      if ((category === 'Personal Documents' || category === 'Business Documents') && fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          document.getElementById('uploadProgress').style.display = 'block';
+          
+          google.script.run.withSuccessHandler((result) => {
+            if (result.success) {
+              fileLink = result.fileLink;
+              driveFileId = result.driveFileId;
+              submitRecord(category, title, name, documentNumber, date, tags, '', webLink, fileLink, driveFileId);
+            } else {
+              showAlert('File upload failed: ' + result.error, 'error');
+            }
+            document.getElementById('uploadProgress').style.display = 'none';
+          }).withFailureHandler((error) => {
+            showAlert('Upload error: ' + error.toString(), 'error');
+            document.getElementById('uploadProgress').style.display = 'none';
+          }).uploadFile(base64, file.name, file.type, category);
+        };
+
+        reader.readAsDataURL(file);
+      } else if (category === 'Video Links & Files') {
+        videoUrl = document.getElementById('videoUrl').value || '';
+        if (!videoUrl && document.getElementById('videoFile').files.length === 0) {
+          showAlert('Please provide a video file or URL', 'error');
+          return;
+        }
+
+        if (document.getElementById('videoFile').files.length > 0) {
+          const file = document.getElementById('videoFile').files[0];
+          const reader = new FileReader();
+
+          reader.onload = () => {
+            const base64 = reader.result.split(',')[1];
+            google.script.run.withSuccessHandler((result) => {
+              if (result.success) {
+                videoUrl = result.fileLink;
+                submitRecord(category, title, name, documentNumber, date, tags, videoUrl, '', '', result.driveFileId);
+              }
+            }).uploadFile(base64, file.name, file.type, category);
+          };
+
+          reader.readAsDataURL(file);
+        } else {
+          submitRecord(category, title, name, documentNumber, date, tags, videoUrl, '', '', '');
+        }
+      } else if (category === 'Website Links') {
+        webLink = document.getElementById('webLink').value;
+        if (!webLink) {
+          showAlert('Please provide a website URL', 'error');
+          return;
+        }
+        submitRecord(category, title, name, documentNumber, date, tags, '', webLink, '', '');
+      } else if ((category === 'Personal Documents' || category === 'Business Documents') && fileInput.files.length === 0) {
+        showAlert('Please upload a document file', 'error');
+        return;
+      }
+    });
+
+    function submitRecord(category, title, name, documentNumber, date, tags, videoUrl, webLink, fileLink, driveFileId) {
+      google.script.run.withSuccessHandler(() => {
+        showAlert('Document saved successfully!', 'success');
+        const modal = bootstrap.Modal.getInstance(document.getElementById('uploadModal'));
+        modal.hide();
+        document.getElementById('uploadForm').reset();
+        fileInput.value = '';
+        document.getElementById('fileName').textContent = '';
+        loadRecords();
+      }).withFailureHandler((error) => {
+        showAlert('Error saving document: ' + error.toString(), 'error');
+      }).addRecord(category, title, name, documentNumber, date, 'Pending', tags, videoUrl, webLink, '');
+    }
+
+    // Initialize
+    loadRecords();
+    setInterval(loadRecords, 10000); // Auto-refresh every 10 seconds
+  </script>
+</body>
+</html>
